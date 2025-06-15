@@ -130,11 +130,6 @@ def evaluate_model(model, X_train, X_test, y_train, y_test):
     print(f"{name}: {value:.2f}")
 
 # PolynomialFeatures c ElasticNet
-from sklearn.preprocessing import PolynomialFeatures
-from sklearn.pipeline import Pipeline
-from sklearn.linear_model import ElasticNet
-from sklearn.model_selection import cross_val_score
-
 def objective(trial):
     degree = trial.suggest_int('degree', 1, 3)
     alpha = trial.suggest_float('alpha', 1e-3, 1.0)
