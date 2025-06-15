@@ -80,7 +80,7 @@ def filter_outlier(data, col, IQR_coef=1.5):
   Q1 = data[col].quantile(0.25)
   Q3 = data[col].quantile(0.75)
   IQR = Q3-Q1
-  data = data[~((data[col] < (Q1 - IQR_coef * IQR)) | (data[col] > (Q3 + IQR_coef * IQR))).any(axis=1)]
+  data = data[(data[col] >= (Q1 - IQR_coef * IQR)) & (data[col] <= (Q3 + IQR_coef * IQR)).any(axis=1)]
   return data.reset_index(drop=True)
 
 data = filter_outlier(data ,["Rotational speed [rpm]", "Torque [Nm]"])
