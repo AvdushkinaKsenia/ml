@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import optuna
 import umap
+import joblib
 import warnings
 
 from sklearn.preprocessing import StandardScaler
@@ -128,17 +129,19 @@ def evaluate_model(model, X_train, X_test, y_train, y_test):
   for name, value in metrics.items():
     print(f"{name}: {value:.2f}")
 
-  return metrics
-
 # PolynomialFeatures c ElasticNet
+from sklearn.preprocessing import PolynomialFeatures
+from sklearn.pipeline import Pipeline
+from sklearn.linear_model import ElasticNet
+from sklearn.model_selection import cross_val_score
+
 def objective(trial):
     degree = trial.suggest_int('degree', 1, 3)
-    alpha = trial.suggest_float('alpha', 1e-5, 1.0, log=True)
+    alpha = trial.suggest_float('alpha', 1e-3, 1.0)
     l1_ratio = trial.suggest_float('l1_ratio', 0.0, 1.0)
-    tol = trial.suggest_float('tol', 1e-5, 1e-2, log=True)
     model = Pipeline([
         ('poly', PolynomialFeatures(degree=degree, include_bias=False)),
-        ('elasticnet', ElasticNet(alpha=alpha, l1_ratio=l1_ratio, tol=tol, random_state=42))
+        ('elasticnet', ElasticNet(alpha=alpha, l1_ratio=l1_ratio, random_state=42))
     ])
     score = cross_val_score(model, X_train, y_train, cv=3, scoring='r2').mean()
     return score
@@ -146,22 +149,21 @@ def objective(trial):
 study = optuna.create_study(direction='maximize')
 study.optimize(objective, n_trials=20)
 print(f"Лучшие параметры: {study.best_params}")
-best_pipeline = Pipeline([
+best_model_pf = Pipeline([
     ('poly', PolynomialFeatures(degree=study.best_params['degree'], include_bias=False)),
-    ('elasticnet', ElasticNet(alpha=study.best_params['alpha'], l1_ratio=study.best_params['l1_ratio'], tol=study.best_params['tol'], random_state=42))
+    ('elasticnet', ElasticNet(alpha=study.best_params['alpha'], l1_ratio=study.best_params['l1_ratio'], random_state=42))
 ])
-best_pipeline.fit(X_train, y_train)
-evaluate_model(best_pipeline, X_train, X_test, y_train, y_test)
+best_model_pf.fit(X_train, y_train)
+evaluate_model(best_model_pf, X_train, X_test, y_train, y_test)
 
 # RandomForestRegressor
 def objective(trial):
     params = {
-        'n_estimators': trial.suggest_int('n_estimators', 50, 200),
-        'max_depth': trial.suggest_int('max_depth', 2, 8),
+        'n_estimators': trial.suggest_int('n_estimators', 50, 100),
+        'max_depth': trial.suggest_int('max_depth', 3, 8),
         'min_samples_split': trial.suggest_int('min_samples_split', 2, 10),
         'min_samples_leaf': trial.suggest_int('min_samples_leaf', 1, 10),
-        'max_features': trial.suggest_categorical('max_features', ['sqrt', 'log2']),
-        'bootstrap': trial.suggest_categorical('bootstrap', [True, False]),
+        'bootstrap': trial.suggest_categorical('bootstrap', [True, False])
     }
     model = RandomForestRegressor(**params, random_state=42, n_jobs=-1)
     score = cross_val_score(model, X_train, y_train, cv=3, scoring="r2").mean()
@@ -170,9 +172,9 @@ def objective(trial):
 study = optuna.create_study(direction="maximize")
 study.optimize(objective, n_trials=20)
 print(f"Лучшие параметры: {study.best_params}")
-best_model = RandomForestRegressor(**study.best_params, random_state=42, n_jobs=-1)
-best_model.fit(X_train, y_train)
-evaluate_model(best_model, X_train, X_test, y_train, y_test)
+best_model_rf = RandomForestRegressor(**study.best_params, random_state=42, n_jobs=-1)
+best_model_rf.fit(X_train, y_train)
+evaluate_model(best_model_rf, X_train, X_test, y_train, y_test)
 
 # CatBoostRegressor
 def objective(trial):
@@ -189,6 +191,12 @@ def objective(trial):
 study = optuna.create_study(direction='maximize')
 study.optimize(objective, n_trials=20)
 print(f"Лучшие параметры: {study.best_params}")
-best_model = CatBoostRegressor(**study.best_params, random_seed=42)
-best_model.fit(X_train, y_train, verbose=False)
-evaluate_model(best_model, X_train, X_test, y_train, y_test)
+best_model_cb = CatBoostRegressor(**study.best_params, random_seed=42)
+best_model_cb.fit(X_train, y_train, verbose=False)
+evaluate_model(best_model_cb, X_train, X_test, y_train, y_test)
+
+# Деплой лучшей модели
+joblib.dump(best_model_rf, 'best_model_rf.pkl')
+loaded_model = joblib.load('best_model_rf.pkl')
+sample = X_pca[0:1]
+print(f'Предсказание: {loaded_model.predict(sample)}') # Предсказываем целевую переменную для первой строки
