@@ -100,8 +100,14 @@ X_scaled = scaler.fit_transform(X)
 X = pd.DataFrame(X_scaled, columns=X.columns)
 
 # Понижение признакого пространства PCA
-pca = PCA(n_components=2)
-X_pca = pca.fit_transform(X, y)
+pca = PCA()
+X_pca = pca.fit_transform(X)
+explained_variance = pca.explained_variance_ratio_
+culminative_variance = explained_variance.cumsum()
+n_comp = (culminative_variance <= 0.95).sum() + 1
+print(f"Число выбранных компонент: {n_comp}")
+pca = PCA(n_components=n_comp)
+X_pca = pca.fit_transform(X)
 X_pca = pd.DataFrame(X_pca, columns=pca.get_feature_names_out())
 
 # Понижение признакого пространства UMAP
