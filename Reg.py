@@ -26,9 +26,6 @@ data = pd.read_csv('MaintenanceR.csv')
 
 # ___Предобработка данных___
 
-# Обработка пропущенных значений
-data.isna().sum()
-
 # float в int
 data['free sulfur dioxide'] = data['free sulfur dioxide'].astype(int)
 
@@ -41,10 +38,14 @@ education_ordinal_features = ['education']
 education_ordinal_encoder = OrdinalEncoder(categories=education_categories, dtype=int)
 
 ct = ColumnTransformer(transformers=[('education', education_ordinal_encoder, education_ordinal_features)], remainder='passthrough', verbose_feature_names_out=False)
-
 ct.set_output(transform='pandas')
 encoded_features = ct.fit_transform(data)
 data=encoded_features
+
+# One-Hot Encoder
+data_ohe = pd.get_dummies(data['relationship'], prefix='relationship', dtype=int)
+data = pd.concat([data, data_ohe], axis=1)
+data.drop('relationship', axis=1, inplace=True)
 
 # LabelEncoder
 label_encoder = LabelEncoder()
@@ -55,6 +56,9 @@ data = data.drop(["Product ID", "UDI"], axis=1)
 
 # Удаление пустых строк
 data = data.dropna(subset=['RainTomorrow'])
+
+# Обработка пропущенных значений
+data.isna().sum()
 
 # Заполнение значением 0 недостающие значения
 data.fillna({'Sunshine': 0, 'Cloud3pm': 0, 'Cloud9am': 0, 'Rainfall': 0}, inplace=True)
@@ -111,8 +115,6 @@ X_train_pca = pca.fit_transform(X_train)
 X_train = pd.DataFrame(X_train_pca, columns=pca.get_feature_names_out())
 X_test_pca = pca.transform(X_test)
 X_test = pd.DataFrame(X_test_pca, columns=pca.get_feature_names_out())
-
-X_train.head()
 
 # ___Модели___
 
@@ -214,5 +216,6 @@ evaluate_model(best_model_cb, X_train, X_test, y_train, y_test)
 joblib.dump(best_model_rf, 'best_model_rf.pkl')
 loaded_model = joblib.load('best_model_rf.pkl')
 sample = X.iloc[0:1]  # Первая строка в исходном формате
+sample = scaler.transform(sample)
 sample = pca.transform(sample)
 print(f'Предсказание: {loaded_model.predict(sample)}')
