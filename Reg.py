@@ -219,3 +219,25 @@ sample = X.iloc[0:1]  # Первая строка в исходном форма
 sample = scaler.transform(sample)
 sample = pca.transform(sample)
 print(f'Предсказание: {loaded_model.predict(sample)}')
+
+'''
+ссылки на билеты:
+1. https://github.com/RimmaShumkova/ml/blob/main/1.txt (Искусственный интеллект (Artificial Intelligence, AI). Большие данные, знания. Технологии AI. Типы AI.)
+2. https://github.com/RimmaShumkova/ml/blob/main/2.txt (Машинное обучение (Machine Learning, ML). Типы ML. Типы задач в ML. Примеры задач)
+3. https://github.com/RimmaShumkova/ml/blob/main/3.txt (Основные понятия ML. Обучающая, валидационная и тестовая выборки. Кросс-валидация. Сравнительная характеристика методов k-fold и holdout.)
+4. https://github.com/RimmaShumkova/ml/blob/main/4.txt (Обучение с учителем. Проблемы ML. Решение проблемы переобучения.)
+5. https://github.com/RimmaShumkova/ml/blob/main/5.txt (Разведочный анализ данных (EDA). Понятие EDA. Цель и этапы EDA. Основы описательной статистики в EDA.)
+6. https://github.com/RimmaShumkova/ml/blob/main/6.txt (Типы данных в EDA. Предобработка данных. Инструменты визуализации EDA. Визуализация зависимостей признаков в наборе данных.)
+7. https://github.com/RimmaShumkova/ml/blob/main/7.txt (Задача регрессии. Линейная модель. Метод наименьших квадратов. Функция потерь. Метрики оценки регрессии.)
+8. https://github.com/RimmaShumkova/ml/blob/main/8.txt (Задача регрессии. Многомерная линейная регрессия, проблема мультиколлинеарности. Регуляризованная регрессия. Полиномиальная регрессия.)
+9. https://github.com/RimmaShumkova/ml/blob/main/9.txt (Задача классификации. Алгоритмы классификации в ML. Проблема дисбаланса классов и ее решение. Методы сэмплирования. Метрики оценки классификации. Ошибки классификации.)
+10. https://github.com/AvdushkinaKsenia/ml/blob/main/10.txt (Логистическая регрессия — это алгоритм классификации, который предсказывает вероятность принадлежности объекта к определённому классу.)
+11. https://github.com/AvdushkinaKsenia/ml/blob/main/11.txt (Метрический классификатор (англ. similarity-based classifier) — алгоритм классификации, основанный на вычислении оценок сходства между объектами.)
+12. https://github.com/AvdushkinaKsenia/ml/blob/main/12.txt (SVM)
+13. https://github.com/AvdushkinaKsenia/ml/blob/main/13.txt (Decision Tree)
+14. https://github.com/AvdushkinaKsenia/ml/blob/main/14.txt (Ансамблевое обучение)
+15. https://github.com/AvdushkinaKsenia/ml/blob/main/15.txt (Бустинг, градиентный бустинг, AdaBoost и т.д)
+16. https://github.com/AvdushkinaKsenia/ml/blob/main/16.txt (Обучение без учителя, кластеризация)
+17. https://github.com/AvdushkinaKsenia/ml/blob/main/17.txt (Кластеризация, алгоритмы, k-means, иерархическая)
+
+'''
