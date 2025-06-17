@@ -116,10 +116,12 @@ X_train = pd.DataFrame(X_train_pca, columns=pca.get_feature_names_out())
 X_test_pca = pca.transform(X_test)
 X_test = pd.DataFrame(X_test_pca, columns=pca.get_feature_names_out())
 
-# Понижение признакого пространства UMAP
+# Понижение признакого пространства UMAP (тоже train и test сделать)
 umap = umap.UMAP(n_components=2)
 X_umap = umap.fit_transform(X, y)
 X_umap = pd.DataFrame(X_umap, columns=umap.get_feature_names_out())
+plt.scatter(X_umap[:, 0], X_umap[:, 1])
+plt.show()
 
 # Балансировка классов
 smote = SMOTE()
