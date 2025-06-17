@@ -3,7 +3,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 import optuna
-import umap
 import joblib
 import warnings
 
@@ -16,6 +15,7 @@ from sklearn.decomposition import PCA
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import PolynomialFeatures
 from sklearn.linear_model import ElasticNet
+from sklearn.tree import DecisionTreeRegressor
 from sklearn.ensemble import RandomForestRegressor
 from catboost import CatBoostRegressor
 
@@ -85,38 +85,34 @@ def filter_outlier(data, col, IQR_coef=1.5):
 
 data = filter_outlier(data ,["Rotational speed [rpm]", "Torque [Nm]"])
 
+# Построение регплотов
+for i, column in enumerate(data.drop(["Tool wear [min]"], axis=1)):
+    sns.regplot(x=column, y="Tool wear [min]", data=data, line_kws={'color': 'red'})
+    plt.show()
+
 # Матрица корреляции
 plt.figure(figsize=(10, 8))
 sns.heatmap(data.corr(), annot=True, fmt=".2f", cmap="PiYG")
 plt.show()
 
-# Разделение данных на X и y
+# Разделение данных на train и test
 X = data.drop(["Tool wear [min]"], axis=1)
 y = data["Tool wear [min]"]
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2, random_state = 42)
 
+# Скалирование
 scaler = StandardScaler()
-
 X_scaled = scaler.fit_transform(X)
 X = pd.DataFrame(X_scaled, columns=X.columns)
 
 # Понижение признакого пространства PCA
-pca = PCA()
-X_pca = pca.fit_transform(X)
-explained_variance = pca.explained_variance_ratio_
-culminative_variance = explained_variance.cumsum()
-n_comp = (culminative_variance <= 0.95).sum() + 1
-print(f"Число выбранных компонент: {n_comp}")
-pca = PCA(n_components=n_comp)
-X_pca = pca.fit_transform(X)
-X_pca = pd.DataFrame(X_pca, columns=pca.get_feature_names_out())
+pca = PCA(n_components=0.95)  # оставляем 95% дисперсии
+X_train_pca = pca.fit_transform(X_train)
+X_train = pd.DataFrame(X_train_pca, columns=pca.get_feature_names_out())
+X_test_pca = pca.transform(X_test)
+X_test = pd.DataFrame(X_test_pca, columns=pca.get_feature_names_out())
 
-# Понижение признакого пространства UMAP
-umap = umap.UMAP(n_components=2)
-X_umap = umap.fit_transform(X, y)
-X_umap = pd.DataFrame(X_umap, columns=umap.get_feature_names_out())
-
-# Разделение данных на train и test
-X_train, X_test, y_train, y_test = train_test_split(X_pca, y, test_size = 0.2, random_state = 42)
+X_train.head()
 
 # ___Модели___
 
@@ -156,6 +152,24 @@ best_model_pf = Pipeline([
 ])
 best_model_pf.fit(X_train, y_train)
 evaluate_model(best_model_pf, X_train, X_test, y_train, y_test)
+
+# DecisionTreeRegressor
+def objective(trial):
+  params = {
+      "max_depth": trial.suggest_int("max_depth", 3, 8),
+      "min_samples_split": trial.suggest_int("min_samples_split", 2, 10),
+      "min_samples_leaf": trial.suggest_int("min_samples_leaf", 1, 10)
+  }
+  model = DecisionTreeRegressor(**params, random_state = 42)
+  score = cross_val_score(model, X_train, y_train, cv=3, scoring="r2").mean()
+  return score
+
+study = optuna.create_study(direction="maximize")
+study.optimize(objective, n_trials=20)
+print(f"Лучшие параметры: {study.best_params}")
+best_model = DecisionTreeRegressor(**study.best_params, random_state = 42)
+best_model.fit(X_train, y_train)
+evaluate_model(best_model, X_train, X_test, y_train, y_test)
 
 # RandomForestRegressor
 def objective(trial):
@@ -199,5 +213,6 @@ evaluate_model(best_model_cb, X_train, X_test, y_train, y_test)
 # Деплой лучшей модели
 joblib.dump(best_model_rf, 'best_model_rf.pkl')
 loaded_model = joblib.load('best_model_rf.pkl')
-sample = X_pca[0:1]
-print(f'Предсказание: {loaded_model.predict(sample)}') # Предсказываем целевую переменную для первой строки
+sample = X.iloc[0:1]  # Первая строка в исходном формате
+sample = pca.transform(sample)
+print(f'Предсказание: {loaded_model.predict(sample)}')
