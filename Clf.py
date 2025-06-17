@@ -116,6 +116,11 @@ X_train = pd.DataFrame(X_train_pca, columns=pca.get_feature_names_out())
 X_test_pca = pca.transform(X_test)
 X_test = pd.DataFrame(X_test_pca, columns=pca.get_feature_names_out())
 
+# Понижение признакого пространства UMAP
+umap = umap.UMAP(n_components=2)
+X_umap = umap.fit_transform(X, y)
+X_umap = pd.DataFrame(X_umap, columns=umap.get_feature_names_out())
+
 # Балансировка классов
 smote = SMOTE()
 X_train, y_train = smote.fit_resample(X_train, y_train)

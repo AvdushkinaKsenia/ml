@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 import optuna
+import umap
 import joblib
 import warnings
 
@@ -71,8 +72,10 @@ data.fillna(fill_values, inplace=True)
 data = data.drop_duplicates(ignore_index=True)
 data.duplicated().sum()
 
-# Гистограмма y
-plt.hist(data["Tool wear [min]"])
+# Гистограммы
+data.hist(bins=30, figsize=(12, 8))
+plt.tight_layout()
+plt.show()
 
 # Построение боксплотов
 for i, column in enumerate(data):
@@ -115,6 +118,11 @@ X_train_pca = pca.fit_transform(X_train)
 X_train = pd.DataFrame(X_train_pca, columns=pca.get_feature_names_out())
 X_test_pca = pca.transform(X_test)
 X_test = pd.DataFrame(X_test_pca, columns=pca.get_feature_names_out())
+
+# Понижение признакого пространства UMAP
+umap = umap.UMAP(n_components=2)
+X_umap = umap.fit_transform(X, y)
+X_umap = pd.DataFrame(X_umap, columns=umap.get_feature_names_out())
 
 # ___Модели___
 
