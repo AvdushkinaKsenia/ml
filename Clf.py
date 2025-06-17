@@ -116,11 +116,13 @@ X_train = pd.DataFrame(X_train_pca, columns=pca.get_feature_names_out())
 X_test_pca = pca.transform(X_test)
 X_test = pd.DataFrame(X_test_pca, columns=pca.get_feature_names_out())
 
-# Понижение признакого пространства UMAP (тоже train и test сделать)
+# Понижение признакого пространства UMAP
 umap = umap.UMAP(n_components=2)
-X_umap = umap.fit_transform(X, y)
-X_umap = pd.DataFrame(X_umap, columns=umap.get_feature_names_out())
-plt.scatter(X_umap[:, 0], X_umap[:, 1])
+X_train_umap = umap.fit_transform(X_train)
+X_train = pd.DataFrame(X_train_umap, columns=umap.get_feature_names_out())
+X_test_umap = umap.transform(X_test)
+X_test = pd.DataFrame(X_test_umap, columns=umap.get_feature_names_out())
+scatter = plt.scatter(X_train.iloc[:, 0], X_train.iloc[:, 1])
 plt.show()
 
 # Балансировка классов
