@@ -119,11 +119,13 @@ X_train = pd.DataFrame(X_train_pca, columns=pca.get_feature_names_out())
 X_test_pca = pca.transform(X_test)
 X_test = pd.DataFrame(X_test_pca, columns=pca.get_feature_names_out())
 
-# Понижение признакого пространства UMAP (тоже train и test сделать)
+# Понижение признакого пространства UMAP
 umap = umap.UMAP(n_components=2)
-X_umap = umap.fit_transform(X, y)
-X_umap = pd.DataFrame(X_umap, columns=umap.get_feature_names_out())
-plt.scatter(X_umap[:, 0], X_umap[:, 1])
+X_train_umap = umap.fit_transform(X_train)
+X_train = pd.DataFrame(X_train_umap, columns=umap.get_feature_names_out())
+X_test_umap = umap.transform(X_test)
+X_test = pd.DataFrame(X_test_umap, columns=umap.get_feature_names_out())
+scatter = plt.scatter(X_train.iloc[:, 0], X_train.iloc[:, 1])
 plt.show()
 
 # ___Модели___
@@ -249,5 +251,12 @@ print(f'Предсказание: {loaded_model.predict(sample)}')
 15. https://github.com/AvdushkinaKsenia/ml/blob/main/15.txt (Бустинг, градиентный бустинг, AdaBoost и т.д)
 16. https://github.com/AvdushkinaKsenia/ml/blob/main/16.txt (Обучение без учителя, кластеризация)
 17. https://github.com/AvdushkinaKsenia/ml/blob/main/17.txt (Кластеризация, алгоритмы, k-means, иерархическая)
-
+18. https://github.com/AvdushkinaKsenia/ml/blob/main/18.txt (алгоритм DBSCAN)
+19. https://github.com/AvdushkinaKsenia/ml/blob/main/19.txt (глубокое обучение)
+20. https://github.com/AvdushkinaKsenia/ml/blob/main/20.txt (базовая архитектура нейросетей)
+21. https://github.com/AvdushkinaKsenia/ml/blob/main/21.txt (полносвязные нейросети)
+22. https://github.com/AvdushkinaKsenia/ml/blob/main/22.txt (работа с изображениями с помощью сверточных НС)
+23. https://github.com/AvdushkinaKsenia/ml/blob/main/23.txt (архитектура сверточных НС)
+24. https://github.com/AvdushkinaKsenia/ml/blob/main/24.txt (задача понижения размерности)
+25. https://github.com/AvdushkinaKsenia/ml/blob/main/25.txt (нелинейные методы снижения размерности)
 '''
